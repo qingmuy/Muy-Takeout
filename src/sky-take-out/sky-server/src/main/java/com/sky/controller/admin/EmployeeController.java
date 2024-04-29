@@ -72,7 +72,7 @@ public class EmployeeController {
         return Result.success();
     }
 
-    @PostMapping("/admin/employee")
+    @PostMapping
     public Result save(@RequestBody EmployeeDTO employeeDTO){
         employeeService.save(employeeDTO);
         return Result.success();
