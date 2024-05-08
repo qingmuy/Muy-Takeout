@@ -1,6 +1,5 @@
 package com.sky.utils;
 
-import com.sky.exception.UserNotLoginException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
@@ -54,22 +53,6 @@ public class JwtUtil {
                 .setSigningKey(secretKey.getBytes(StandardCharsets.UTF_8))
                 // 设置需要解析的jwt
                 .parseClaimsJws(token).getBody();
-    }
-
-    public static Integer getUserIdFromToken(String secretKey, String token) {
-        Integer result;
-        try {
-            Claims claims = Jwts.parser()
-                    // 设置签名的秘钥
-                    .setSigningKey(secretKey.getBytes(StandardCharsets.UTF_8))
-                    // 设置需要解析的jwt
-                    .parseClaimsJws(token).getBody();
-            result =  claims.get("empId", Integer.class);
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new UserNotLoginException("Token错误");
-        }
-        return result;
     }
 
 }
