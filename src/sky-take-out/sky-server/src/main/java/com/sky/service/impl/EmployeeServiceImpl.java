@@ -1,5 +1,6 @@
 package com.sky.service.impl;
 
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.sky.constant.MessageConstant;
 import com.sky.constant.PasswordConstant;
 import com.sky.constant.StatusConstant;
@@ -10,20 +11,27 @@ import com.sky.exception.AccountLockedException;
 import com.sky.exception.AccountNotFoundException;
 import com.sky.exception.PasswordErrorException;
 import com.sky.mapper.EmployeeMapper;
+import com.sky.properties.JwtProperties;
 import com.sky.service.EmployeeService;
+import com.sky.utils.JwtUtil;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Service
-public class EmployeeServiceImpl implements EmployeeService {
+public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee> implements EmployeeService {
 
     @Autowired
     private EmployeeMapper employeeMapper;
+
+    @Resource
+    private JwtProperties jwtProperties;
 
     /**
      * 员工登录
@@ -62,7 +70,14 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
-    public void save(EmployeeDTO employeeDTO) {
+    public Employee getLoginUser(HttpServletRequest request) {
+        Integer token = JwtUtil.getUserIdFromToken(jwtProperties.getAdminSecretKey(), request.getHeader("token"));
+        return this.getById(token);
+    }
+
+
+    @Override
+    public void save(Employee loginUser, EmployeeDTO employeeDTO) {
         Employee employee = new Employee();
 
         // 对象属性拷贝
@@ -79,9 +94,13 @@ public class EmployeeServiceImpl implements EmployeeService {
         employee.setUpdateTime(LocalDateTime.now());
 
         // 设置当前记录创建人id和修改人id
-        // TODO 此处需要完善：根据当前用户的token获取id并将其设置为创建人id和修改人id
-        employee.setCreateUser(10L);
-        employee.setUpdateUser(10L);
+        // 此处同时可以通过获取线程ID直接获取当前用户的id
+
+        /*employee.setCreateUser(BaseContext.getCurrentId());
+        employee.setUpdateUser(BaseContext.getCurrentId());*/
+
+        employee.setCreateUser(loginUser.getId());
+        employee.setUpdateUser(loginUser.getId());
 
         employeeMapper.insert(employee);
     }

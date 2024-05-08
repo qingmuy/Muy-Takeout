@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -73,8 +74,9 @@ public class EmployeeController {
     }
 
     @PostMapping
-    public Result save(@RequestBody EmployeeDTO employeeDTO){
-        employeeService.save(employeeDTO);
+    public Result save(HttpServletRequest request, @RequestBody EmployeeDTO employeeDTO){
+        Employee loginUser = employeeService.getLoginUser(request);
+        employeeService.save(loginUser, employeeDTO);
         return Result.success();
     }
 }
