@@ -1,5 +1,7 @@
 package com.sky.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.sky.constant.MessageConstant;
 import com.sky.constant.PasswordConstant;
@@ -7,11 +9,13 @@ import com.sky.constant.StatusConstant;
 import com.sky.context.BaseContext;
 import com.sky.dto.EmployeeDTO;
 import com.sky.dto.EmployeeLoginDTO;
+import com.sky.dto.EmployeePageQueryDTO;
 import com.sky.entity.Employee;
 import com.sky.exception.AccountLockedException;
 import com.sky.exception.AccountNotFoundException;
 import com.sky.exception.PasswordErrorException;
 import com.sky.mapper.EmployeeMapper;
+import com.sky.result.PageResult;
 import com.sky.service.EmployeeService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,6 +74,11 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee> i
     }
 
 
+    /**
+     * 新增员工
+     * @param loginUser
+     * @param employeeDTO
+     */
     @Override
     public void save(Employee loginUser, EmployeeDTO employeeDTO) {
         Employee employee = new Employee();
@@ -92,6 +101,29 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee> i
         employee.setUpdateUser(BaseContext.getCurrentId());
 
         employeeMapper.insert(employee);
+    }
+
+    /**
+     * 分页查询
+     * @param queryDTO
+     * @return
+     */
+    @Override
+    public PageResult pagequery(EmployeePageQueryDTO queryDTO) {
+        Page<Employee> page = new Page<>(queryDTO.getPage(), queryDTO.getPageSize());
+
+        // 传入的查询条件“name”为空的情况下
+        if (queryDTO.getName() == null || queryDTO.getName().isEmpty()){
+            // 查询条件为空，直接查询
+            Page<Employee> employeePage = employeeMapper.selectPage(page, null);
+            return new PageResult(employeePage.getTotal(), employeePage.getRecords());
+        }
+
+        // 包含“name”的情况下
+        LambdaQueryWrapper<Employee> qw = new LambdaQueryWrapper<>();
+        qw.like(Employee::getName, "王");
+        Page<Employee> employeePage = employeeMapper.selectPage(page, qw);
+        return new PageResult(employeePage.getTotal(), employeePage.getRecords());
     }
 
 }
