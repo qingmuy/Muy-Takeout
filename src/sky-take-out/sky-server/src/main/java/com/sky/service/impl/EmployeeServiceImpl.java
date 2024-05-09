@@ -121,7 +121,7 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee> i
 
         // 包含“name”的情况下
         LambdaQueryWrapper<Employee> qw = new LambdaQueryWrapper<>();
-        qw.like(Employee::getName, "王");
+        qw.like(Employee::getName, queryDTO.getName());
         Page<Employee> employeePage = employeeMapper.selectPage(page, qw);
         return new PageResult(employeePage.getTotal(), employeePage.getRecords());
     }
