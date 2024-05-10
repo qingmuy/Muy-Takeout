@@ -1,6 +1,7 @@
 package com.sky.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.sky.constant.MessageConstant;
@@ -18,10 +19,10 @@ import com.sky.mapper.EmployeeMapper;
 import com.sky.result.PageResult;
 import com.sky.service.EmployeeService;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.util.Objects;
@@ -29,14 +30,14 @@ import java.util.Objects;
 @Service
 public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee> implements EmployeeService {
 
-    @Autowired
+    @Resource
     private EmployeeMapper employeeMapper;
 
     /**
      * 员工登录
      *
-     * @param employeeLoginDTO
-     * @return
+     * @param employeeLoginDTO 员工的登录信息
+     * @return 返回员工的具体信息
      */
     public Employee login(EmployeeLoginDTO employeeLoginDTO) {
         String username = employeeLoginDTO.getUsername();
@@ -76,8 +77,8 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee> i
 
     /**
      * 新增员工
-     * @param loginUser
-     * @param employeeDTO
+     * @param loginUser 当前登录的用户
+     * @param employeeDTO 新增的员工的信息
      */
     @Override
     public void save(Employee loginUser, EmployeeDTO employeeDTO) {
@@ -105,8 +106,8 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee> i
 
     /**
      * 分页查询
-     * @param queryDTO
-     * @return
+     * @param queryDTO 分页查询的条件
+     * @return 分页查询的结果
      */
     @Override
     public PageResult pagequery(EmployeePageQueryDTO queryDTO) {
@@ -124,6 +125,40 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee> i
         qw.like(Employee::getName, queryDTO.getName());
         Page<Employee> employeePage = employeeMapper.selectPage(page, qw);
         return new PageResult(employeePage.getTotal(), employeePage.getRecords());
+    }
+
+    /**
+     * 通过LambdaUpdateWrapper更新账号状态
+     * @param status 状态
+     * @param id 账号的id
+     */
+    @Override
+    public void changeStatus(Integer status, Long id) {
+        LambdaUpdateWrapper<Employee> uw = new LambdaUpdateWrapper<>();
+        System.out.println("id=" + id);
+        uw.eq(Employee::getId, id);
+        Employee employee = new Employee();
+        employee.setStatus(status);
+        employeeMapper.update(employee, uw);
+    }
+
+    @Override
+    public Employee queryById(Long id) {
+        Employee target = this.getById(id);
+        target.setPassword("*****");
+        return target;
+    }
+
+    @Override
+    public void updateEmployee(EmployeeDTO employeeDTO) {
+        Employee employee = new Employee();
+
+        BeanUtils.copyProperties(employeeDTO, employee);
+
+        employee.setUpdateUser(BaseContext.getCurrentId());
+        employee.setUpdateTime(LocalDateTime.now());
+
+        this.updateById(employee);
     }
 
 }

@@ -36,8 +36,8 @@ public class EmployeeController {
     /**
      * 登录
      *
-     * @param employeeLoginDTO
-     * @return
+     * @param employeeLoginDTO 用户的登录信息
+     * @return token
      */
     @PostMapping("/login")
     @ApiOperation("员工登录")
@@ -67,7 +67,7 @@ public class EmployeeController {
     /**
      * 退出
      *
-     * @return
+     * @return 是否成功
      */
     @PostMapping("/logout")
     @ApiOperation("登出账号")
@@ -77,13 +77,14 @@ public class EmployeeController {
 
     /**
      * 新增员工
-     * @param request
-     * @param employeeDTO
-     * @return
+     *
+     * @param request 请求的信息
+     * @param employeeDTO 员工的信息
+     * @return 是否成功
      */
     @PostMapping
     @ApiOperation("新增员工")
-    public Result<Boolean> save(HttpServletRequest request, @RequestBody EmployeeDTO employeeDTO){
+    public Result<Boolean> save(HttpServletRequest request, @RequestBody EmployeeDTO employeeDTO) {
         Employee loginUser = employeeService.getLoginUser(request);
         employeeService.save(loginUser, employeeDTO);
         return Result.success();
@@ -91,13 +92,52 @@ public class EmployeeController {
 
     /**
      * 分页查询返回
-     * @param queryDTO
-     * @return
+     *
+     * @param queryDTO 分页查询的条件
+     * @return 分页查询信息
      */
     @GetMapping("/page")
     @ApiOperation("分页查询")
-    public Result<PageResult> page(EmployeePageQueryDTO queryDTO){
+    public Result<PageResult> page(EmployeePageQueryDTO queryDTO) {
         return Result.success(employeeService.pagequery(queryDTO));
     }
 
+    /**
+     * 改变账号状态
+     *
+     * @param status 状态
+     * @param id 账号的id
+     * @return 是否修改成功
+     */
+    @PostMapping("status/{status}")
+    @ApiOperation("改变账号状态")
+    public Result<Boolean> changeStatus(@PathVariable Integer status, Long id) {
+        log.info("Controller ID = " + id);
+        employeeService.changeStatus(status, id);
+        return Result.success();
+    }
+
+    /**
+     * 根据ID查询员工信息详情
+     * @param id 要查询的员工的id
+     * @return 该员工的信息
+     */
+    @GetMapping("/{id}")
+    @ApiOperation("根据ID查询员工信息详情")
+    public Result<Employee> quertById(@PathVariable Long id) {
+        Employee employee = employeeService.queryById(id);
+        return Result.success(employee);
+    }
+
+    /**
+     * 编辑员工信息
+     * @param employeeDTO 修改后员工的信息
+     * @return 是否修改成功
+     */
+    @PutMapping
+    @ApiOperation("编辑员工信息")
+    public Result<Boolean> update(@RequestBody EmployeeDTO employeeDTO) {
+        employeeService.updateEmployee(employeeDTO);
+        return Result.success();
+    }
 }
