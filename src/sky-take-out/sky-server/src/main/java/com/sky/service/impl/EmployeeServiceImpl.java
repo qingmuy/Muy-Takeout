@@ -24,7 +24,6 @@ import org.springframework.util.DigestUtils;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
-import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Service
@@ -93,15 +92,7 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee> i
         // 设置密码，默认密码为123456
         employee.setPassword(DigestUtils.md5DigestAsHex(PasswordConstant.DEFAULT_PASSWORD.getBytes()));
 
-        // 设置当前记录的创建时间和修改时间
-        employee.setCreateTime(LocalDateTime.now());
-        employee.setUpdateTime(LocalDateTime.now());
-
-        // 设置当前记录创建人id和修改人id
-        employee.setCreateUser(BaseContext.getCurrentId());
-        employee.setUpdateUser(BaseContext.getCurrentId());
-
-        employeeMapper.insert(employee);
+        employeeMapper.inserte(employee);
     }
 
     /**
@@ -139,7 +130,8 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee> i
         uw.eq(Employee::getId, id);
         Employee employee = new Employee();
         employee.setStatus(status);
-        employeeMapper.update(employee, uw);
+        employee.setId(id);
+        employeeMapper.updatee(employee);
     }
 
     @Override
@@ -155,10 +147,7 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee> i
 
         BeanUtils.copyProperties(employeeDTO, employee);
 
-        employee.setUpdateUser(BaseContext.getCurrentId());
-        employee.setUpdateTime(LocalDateTime.now());
-
-        this.updateById(employee);
+        employeeMapper.updatee(employee);
     }
 
 }
