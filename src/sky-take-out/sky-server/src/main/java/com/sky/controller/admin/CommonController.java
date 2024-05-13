@@ -24,6 +24,11 @@ public class CommonController {
     @Resource
     AliOssUtil aliOssUtil;
 
+    /**
+     * 上传图片文件
+     * @param file 图片文件
+     * @return 该图片在oss服务器的路径
+     */
     @PostMapping("/upload")
     @ApiOperation("文件上传")
     public Result<String> upload(MultipartFile file) {
