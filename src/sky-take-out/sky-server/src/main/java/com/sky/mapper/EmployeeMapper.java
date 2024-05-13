@@ -22,6 +22,7 @@ public interface EmployeeMapper extends BaseMapper<Employee> {
     @Insert("insert into employee (name, username, password, phone, sex, id_number, create_time, update_time, create_user, update_user)" +
             "values " +
             "(#{name}, #{username}, #{password}, #{phone}, #{sex}, #{id_number}, #{createTime}, #{updateTime}, #{createUser}, #{updateUser})")
+    @AutoFill(value = OperationType.INSERT)
     void inserte(Employee employee);
 
     @AutoFill(value = OperationType.UPDATE)
