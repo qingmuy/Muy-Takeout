@@ -138,4 +138,19 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
             dishFlavorMapper.insertBatch(flavors);
         }
     }
+
+    /**
+     * 修改菜品状态
+     * @param status 目标状态
+     * @param id 菜品id
+     */
+    @Override
+    public void changeStatus(Integer status, Long id) {
+        Dish dish = new Dish();
+        dish.setStatus(status);
+        dish.setId(id);
+        dish.setUpdateTime(LocalDateTime.now());
+        dish.setUpdateUser(BaseContext.getCurrentId());
+        dishMapper.updateById(dish);
+    }
 }
