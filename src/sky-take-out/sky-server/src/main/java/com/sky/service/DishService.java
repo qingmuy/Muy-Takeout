@@ -5,6 +5,7 @@ import com.sky.dto.DishDTO;
 import com.sky.dto.DishPageQueryDTO;
 import com.sky.entity.Dish;
 import com.sky.result.PageResult;
+import com.sky.vo.DishVO;
 
 import java.util.List;
 
@@ -28,4 +29,17 @@ public interface DishService extends IService<Dish> {
      * @param ids 菜品Id
      */
     void deleteByids(List<Long> ids);
+
+    /**
+     * 根据Id查询菜品信息
+     * @param id 菜品的id
+     * @return 菜品的返回对象
+     */
+    DishVO getVOById(Long id);
+
+    /**
+     * 修改菜品信息
+     * @param dishDTO 菜品的信息
+     */
+    void updatee(DishDTO dishDTO);
 }
