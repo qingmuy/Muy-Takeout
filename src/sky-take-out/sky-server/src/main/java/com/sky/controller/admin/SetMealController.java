@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
 
 @RestController
 @Api(tags = "套餐相关接口")
@@ -43,6 +44,23 @@ public class SetMealController {
     public Result<PageResult> queryByPage(SetmealPageQueryDTO queryDTO) {
         PageResult pageResult = setMealService.queryByPage(queryDTO);
         return Result.success(pageResult);
+    }
+
+    /**
+     * 批量删除套餐
+     * @param ids 套餐id列表
+     * @return 是否成功删除
+     */
+    @DeleteMapping
+    @ApiOperation("批量删除套餐")
+    public Result<String> delete(String ids) {
+        String[] split = ids.split(",");
+        ArrayList<Integer> lst = new ArrayList<>();
+        for (String num : split) {
+            lst.add(Integer.parseInt(num));
+        }
+        setMealService.deleteByIds(lst);
+        return Result.success();
     }
 
 }

@@ -6,6 +6,8 @@ import com.sky.dto.SetmealPageQueryDTO;
 import com.sky.entity.Setmeal;
 import com.sky.result.PageResult;
 
+import java.util.ArrayList;
+
 public interface SetMealService extends IService<Setmeal> {
     /**
      * 新增菜品
@@ -19,4 +21,10 @@ public interface SetMealService extends IService<Setmeal> {
      * @return 分页查询结果
      */
     PageResult queryByPage(SetmealPageQueryDTO queryDTO);
+
+    /**
+     * 批量删除套餐
+     * @param lst 套餐列表
+     */
+    void deleteByIds(ArrayList<Integer> lst);
 }

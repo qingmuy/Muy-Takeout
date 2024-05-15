@@ -1,11 +1,14 @@
 package com.sky.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.sky.constant.MessageConstant;
 import com.sky.dto.SetmealDTO;
 import com.sky.dto.SetmealPageQueryDTO;
 import com.sky.entity.Setmeal;
 import com.sky.entity.SetmealDish;
+import com.sky.exception.DeletionNotAllowedException;
 import com.sky.mapper.SetmealDishMapper;
 import com.sky.mapper.SetmealMapper;
 import com.sky.result.PageResult;
@@ -16,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
 
 @Service
 @Slf4j
@@ -52,5 +56,28 @@ public class SetMealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal> impl
         Page<Setmeal> page = new Page<>(queryDTO.getPage(), queryDTO.getPageSize());
         Page<Setmeal> setmealPage = setmealMapper.selectPage(page, null);
         return new PageResult(setmealPage.getTotal(), setmealPage.getRecords());
+    }
+
+    /**
+     * 批量删除套餐
+     * @param lst 套餐列表
+     */
+    @Override
+    public void deleteByIds(ArrayList<Integer> lst) {
+        // 查看套餐列表中是否有在售的套餐
+        LambdaQueryWrapper<Setmeal> qw = new LambdaQueryWrapper<>();
+        qw.eq(Setmeal::getStatus, 1)
+                .in(Setmeal::getId, lst);
+        Long l = setmealMapper.selectCount(qw);
+
+        // 处理包含列表中有在售的情况
+        if (l > 0) {
+            throw new DeletionNotAllowedException(MessageConstant.SETMEAL_ON_SALE);
+        }
+
+        // 删除套餐
+        LambdaQueryWrapper<Setmeal> qw1 = new LambdaQueryWrapper<>();
+        qw1.in(Setmeal::getId, lst);
+        setmealMapper.delete(qw1);
     }
 }
