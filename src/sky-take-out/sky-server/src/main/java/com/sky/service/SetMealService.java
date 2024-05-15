@@ -5,6 +5,7 @@ import com.sky.dto.SetmealDTO;
 import com.sky.dto.SetmealPageQueryDTO;
 import com.sky.entity.Setmeal;
 import com.sky.result.PageResult;
+import com.sky.vo.SetmealVO;
 
 import java.util.ArrayList;
 
@@ -27,4 +28,17 @@ public interface SetMealService extends IService<Setmeal> {
      * @param lst 套餐列表
      */
     void deleteByIds(ArrayList<Integer> lst);
+
+    /**
+     * 根据id查询套餐详情
+     * @param id 套餐的id
+     * @return 套餐信息
+     */
+    SetmealVO queryById(Long id);
+
+    /**
+     * 修改套餐数据
+     * @param setmealDTO 套餐的数据
+     */
+    void updateDate(SetmealDTO setmealDTO);
 }

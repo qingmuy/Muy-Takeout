@@ -10,4 +10,8 @@
             values
         (#{categoryId}, #{name}, #{price}, #{description}, #{image}, #{createTime}, #{updateTime}, #{createUser}, #{updateUser})
     </insert>
+
+    <update id="updateDate">
+
+    </update>
 </mapper>

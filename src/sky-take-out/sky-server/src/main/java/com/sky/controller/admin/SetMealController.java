@@ -5,6 +5,7 @@ import com.sky.dto.SetmealPageQueryDTO;
 import com.sky.result.PageResult;
 import com.sky.result.Result;
 import com.sky.service.SetMealService;
+import com.sky.vo.SetmealVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -60,6 +61,30 @@ public class SetMealController {
             lst.add(Integer.parseInt(num));
         }
         setMealService.deleteByIds(lst);
+        return Result.success();
+    }
+
+    /**
+     * 根据id查询套餐信息
+     * @param id 套餐id
+     * @return 套餐的信息
+     */
+    @GetMapping("/{id}")
+    @ApiOperation("根据id查询套餐信息")
+    public Result<SetmealVO> queryById(@PathVariable Long id) {
+        SetmealVO SetmealVO = setMealService.queryById(id);
+        return Result.success(SetmealVO);
+    }
+
+    /**
+     * 修改套餐数据
+     * @param setmealDTO 套餐的信息
+     * @return 是否修改成功
+     */
+    @PutMapping
+    @ApiOperation("修改套餐数据")
+    public Result<String> update(@RequestBody SetmealDTO setmealDTO) {
+        setMealService.updateDate(setmealDTO);
         return Result.success();
     }
 
