@@ -1,5 +1,6 @@
 package com.sky.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
@@ -152,5 +153,18 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
         dish.setUpdateTime(LocalDateTime.now());
         dish.setUpdateUser(BaseContext.getCurrentId());
         dishMapper.updateById(dish);
+    }
+
+    /**
+     * 根据分类id查询菜品列表
+     * @param categoryId 分类id
+     * @return 菜品列表
+     */
+    @Override
+    public List<Dish> getByCategoryId(Long categoryId) {
+        LambdaQueryWrapper<Dish> qw = new LambdaQueryWrapper<>();
+        qw.eq(Dish::getCategoryId, categoryId);
+
+        return dishMapper.selectList(qw);
     }
 }

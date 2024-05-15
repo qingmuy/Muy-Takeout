@@ -49,4 +49,11 @@ public interface DishService extends IService<Dish> {
      * @param id 菜品id
      */
     void changeStatus(Integer status, Long id);
+
+    /**
+     * 根据分类Id查询菜品
+     * @param categoryId 分类id
+     * @return 菜品列表
+     */
+    List<Dish> getByCategoryId(Long categoryId);
 }
