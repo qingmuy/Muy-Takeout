@@ -10,4 +10,11 @@
         </foreach>
     </select>
 
+    <insert id="insertall">
+        insert into setmeal_dish (setmeal_id, dish_id, name, price, copies) values
+        <foreach collection="setmealDishes" item="smd" separator=",">
+            (#{id}, #{smd.dishId}, #{smd.name}, #{smd.price}, #{smd.copies})
+        </foreach>
+    </insert>
+
 </mapper>

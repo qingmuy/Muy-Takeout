@@ -123,10 +123,7 @@ public class SetMealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal> impl
         qw.eq(SetmealDish::getSetmealId, setmealDTO.getId());
         setmealDishMapper.delete(qw);
 
-        // 重新插入数据
-        for (SetmealDish setmealDish : setmealDishes) {
-            setmealDish.setSetmealId(setmealDTO.getId());
-            setmealDishMapper.insert(setmealDish);
-        }
+        // 优化sql：集合插入
+        setmealDishMapper.insertall(setmealDishes, setmealDTO.getId());
     }
 }
