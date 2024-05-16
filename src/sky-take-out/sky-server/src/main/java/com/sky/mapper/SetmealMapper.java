@@ -24,4 +24,11 @@ public interface SetmealMapper extends BaseMapper<Setmeal> {
      */
     @AutoFill(OperationType.INSERT)
     void addnewmeal(Setmeal setmeal);
+
+    /**
+     * 修改套餐的状态：起售/停售
+     * @param setmeal 套餐信息
+     */
+    @AutoFill(OperationType.UPDATE)
+    void updateByIdButAutoFill(Setmeal setmeal);
 }

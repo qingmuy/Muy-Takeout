@@ -11,7 +11,10 @@
         (#{categoryId}, #{name}, #{price}, #{description}, #{image}, #{createTime}, #{updateTime}, #{createUser}, #{updateUser})
     </insert>
 
-    <update id="updateDate">
-
+    <update id="updateByIdButAutoFill">
+        update setmeal
+        <set>
+            status = #{status}
+        </set>
     </update>
 </mapper>

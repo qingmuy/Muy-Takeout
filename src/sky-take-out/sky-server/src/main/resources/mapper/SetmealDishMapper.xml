@@ -17,4 +17,14 @@
         </foreach>
     </insert>
 
+    <select id="selectBySetMealId" resultType="java.lang.Integer">
+         select count(*) from dish
+         <where>
+             status = 0
+             and id in
+             (select dish_id from setmeal_dish where setmeal_id = #{id})
+         </where>
+
+    </select>
+
 </mapper>

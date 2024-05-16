@@ -41,4 +41,11 @@ public interface SetMealService extends IService<Setmeal> {
      * @param setmealDTO 套餐的数据
      */
     void updateDate(SetmealDTO setmealDTO);
+
+    /**
+     * 修改套餐起售/停售的状态
+     * @param id 套餐id
+     * @param status 套餐的状态
+     */
+    void changeStatus(Long id, Integer status);
 }

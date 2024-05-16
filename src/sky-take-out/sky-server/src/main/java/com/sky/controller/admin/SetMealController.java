@@ -88,4 +88,17 @@ public class SetMealController {
         return Result.success();
     }
 
+    /**
+     * 修改套餐起售/停售状态
+     * @param status 状态
+     * @param id 套餐id
+     * @return 成功修改
+     */
+    @PostMapping("/status/{status}")
+    @ApiOperation("修改套餐状态")
+    public Result<String> changeStatus(@PathVariable Integer status, Long id) {
+        setMealService.changeStatus(id, status);
+        return Result.success();
+    }
+
 }

@@ -10,6 +10,7 @@ import com.sky.dto.SetmealPageQueryDTO;
 import com.sky.entity.Setmeal;
 import com.sky.entity.SetmealDish;
 import com.sky.exception.DeletionNotAllowedException;
+import com.sky.exception.SetmealEnableFailedException;
 import com.sky.mapper.SetmealDishMapper;
 import com.sky.mapper.SetmealMapper;
 import com.sky.result.PageResult;
@@ -125,5 +126,27 @@ public class SetMealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal> impl
 
         // 优化sql：集合插入
         setmealDishMapper.insertall(setmealDishes, setmealDTO.getId());
+    }
+
+    /**
+     * 修改套餐起售/停售的状态
+     * @param id 套餐id
+     * @param status 套餐的状态
+     */
+    @Override
+    public void changeStatus(Long id, Integer status) {
+        // 如果是要起售菜品就需要先查询套餐中停售的菜品个数
+        if (status == 1) {
+            Integer num = setmealDishMapper.selectBySetMealId(id);
+            if (num > 0) {
+                throw new SetmealEnableFailedException(MessageConstant.SETMEAL_ENABLE_FAILED);
+            }
+        }
+        Setmeal setmeal = new Setmeal();
+
+        setmeal.setId(id);
+        setmeal.setStatus(status);
+
+        setmealMapper.updateByIdButAutoFill(setmeal);
     }
 }

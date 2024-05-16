@@ -17,9 +17,15 @@ public interface SetmealDishMapper extends BaseMapper<SetmealDish> {
 
     /**
      * 插入所有的信息
-     *
      * @param setmealDishes 菜品信息集合
      * @param id 套餐的id
      */
     void insertall(List<SetmealDish> setmealDishes, Long id);
+
+    /**
+     * 根据套餐id查询套餐中停售的菜品个数
+     * @param id 套餐的id
+     * @return 停售的菜品个数
+     */
+    Integer selectBySetMealId(Long id);
 }
