@@ -33,7 +33,7 @@ public class WebMvcConfiguration extends WebMvcConfigurationSupport {
     /**
      * 注册自定义拦截器
      *
-     * @param registry
+     * @param registry 拦截器
      */
     protected void addInterceptors(InterceptorRegistry registry) {
         log.info("开始注册自定义拦截器...");
@@ -44,27 +44,43 @@ public class WebMvcConfiguration extends WebMvcConfigurationSupport {
 
     /**
      * 通过knife4j生成接口文档
-     * @return
+     * @return 接口文档
      */
     @Bean
-    public Docket docket() {
+    public Docket docket_admin() {
         ApiInfo apiInfo = new ApiInfoBuilder()
                 .title("苍穹外卖项目接口文档")
                 .version("2.0")
                 .description("苍穹外卖项目接口文档")
                 .build();
-        Docket docket = new Docket(DocumentationType.SWAGGER_2)
+        return new Docket(DocumentationType.SWAGGER_2)
+                .groupName("管理端接口")
                 .apiInfo(apiInfo)
                 .select()
-                .apis(RequestHandlerSelectors.basePackage("com.sky.controller"))
+                .apis(RequestHandlerSelectors.basePackage("com.sky.controller.admin"))
                 .paths(PathSelectors.any())
                 .build();
-        return docket;
+    }
+
+    @Bean
+    public Docket docket_user() {
+        ApiInfo apiInfo = new ApiInfoBuilder()
+                .title("苍穹外卖项目接口文档")
+                .version("2.0")
+                .description("苍穹外卖项目接口文档")
+                .build();
+        return new Docket(DocumentationType.SWAGGER_2)
+                .groupName("用户端接口")
+                .apiInfo(apiInfo)
+                .select()
+                .apis(RequestHandlerSelectors.basePackage("com.sky.controller.user"))
+                .paths(PathSelectors.any())
+                .build();
     }
 
     /**
      * 设置静态资源映射
-     * @param registry
+     * @param registry 静态资源映射
      */
     protected void addResourceHandlers(ResourceHandlerRegistry registry) {
         registry.addResourceHandler("/doc.html").addResourceLocations("classpath:/META-INF/resources/");
