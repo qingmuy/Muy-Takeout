@@ -2,9 +2,11 @@ package com.sky.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.sky.constant.MessageConstant;
 import com.sky.context.BaseContext;
+import com.sky.dto.OrdersPageQueryDTO;
 import com.sky.dto.OrdersPaymentDTO;
 import com.sky.dto.OrdersSubmitDTO;
 import com.sky.entity.*;
@@ -13,8 +15,9 @@ import com.sky.exception.ShoppingCartBusinessException;
 import com.sky.mapper.OrdersMapper;
 import com.sky.mapper.ShoppingCartMapper;
 import com.sky.mapper.UserMapper;
+import com.sky.result.PageResult;
 import com.sky.service.AddressBookService;
-import com.sky.service.OrdersService;
+import com.sky.service.OrderService;
 import com.sky.utils.WeChatPayUtil;
 import com.sky.vo.OrderPaymentVO;
 import com.sky.vo.OrderSubmitVO;
@@ -30,7 +33,7 @@ import java.util.List;
 
 @Service
 @Slf4j
-public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> implements OrdersService {
+public class OrderServiceImpl extends ServiceImpl<OrdersMapper, Orders> implements OrderService {
 
     @Resource
     AddressBookService addressBookService;
@@ -158,5 +161,33 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
                 .build();
 
         ordersMapper.update(orders);
+    }
+
+    @Override
+    public PageResult search(OrdersPageQueryDTO ordersPageQueryDTO) {
+        LambdaQueryWrapper<Orders> qw = new LambdaQueryWrapper<>();
+
+        // 拼接查询条件
+        if (ordersPageQueryDTO.getStatus() != null) {
+            qw.eq(Orders::getStatus, ordersPageQueryDTO.getStatus());
+        }
+        if (ordersPageQueryDTO.getPhone() != null) {
+            qw.eq(Orders::getStatus, ordersPageQueryDTO.getStatus());
+        }
+        if (ordersPageQueryDTO.getNumber() != null) {
+            qw.eq(Orders::getNumber, ordersPageQueryDTO.getNumber());
+        }
+        if (ordersPageQueryDTO.getBeginTime() != null && ordersPageQueryDTO.getEndTime() != null) {
+            qw.between(Orders::getOrderTime, ordersPageQueryDTO.getBeginTime(), ordersPageQueryDTO.getEndTime());
+        } else if (ordersPageQueryDTO.getBeginTime() != null) {
+            qw.ge(Orders::getOrderTime, ordersPageQueryDTO.getBeginTime());
+        } else if (ordersPageQueryDTO.getEndTime() != null){
+            qw.le(Orders::getOrderTime, ordersPageQueryDTO.getEndTime());
+        }
+
+        Page<Orders> page = new Page<>(ordersPageQueryDTO.getPage(), ordersPageQueryDTO.getPageSize());
+        Page<Orders> ordersPage = ordersMapper.selectPage(page, qw);
+
+        return new PageResult(ordersPage.getTotal(), ordersPage.getRecords());
     }
 }
