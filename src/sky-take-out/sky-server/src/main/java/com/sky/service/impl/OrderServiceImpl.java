@@ -9,7 +9,10 @@ import com.sky.context.BaseContext;
 import com.sky.dto.OrdersPageQueryDTO;
 import com.sky.dto.OrdersPaymentDTO;
 import com.sky.dto.OrdersSubmitDTO;
-import com.sky.entity.*;
+import com.sky.entity.AddressBook;
+import com.sky.entity.OrderDetail;
+import com.sky.entity.Orders;
+import com.sky.entity.ShoppingCart;
 import com.sky.exception.AddressBookBusinessException;
 import com.sky.exception.ShoppingCartBusinessException;
 import com.sky.mapper.OrdersMapper;
@@ -18,7 +21,6 @@ import com.sky.mapper.UserMapper;
 import com.sky.result.PageResult;
 import com.sky.service.AddressBookService;
 import com.sky.service.OrderService;
-import com.sky.utils.WeChatPayUtil;
 import com.sky.vo.OrderPaymentVO;
 import com.sky.vo.OrderSubmitVO;
 import lombok.extern.slf4j.Slf4j;
@@ -47,8 +49,8 @@ public class OrderServiceImpl extends ServiceImpl<OrdersMapper, Orders> implemen
     @Resource
     UserMapper userMapper;
 
-    @Resource
-    WeChatPayUtil weChatPayUtil;
+    /*@Resource
+    WeChatPayUtil weChatPayUtil;*/
 
     /**
      * 提交订单
@@ -119,7 +121,7 @@ public class OrderServiceImpl extends ServiceImpl<OrdersMapper, Orders> implemen
     public OrderPaymentVO payment(OrdersPaymentDTO ordersPaymentDTO) throws Exception {
         // 当前登录用户id
         Long userId = BaseContext.getCurrentId();
-        User user = userMapper.selectById(userId);
+        // User user = userMapper.selectById(userId);
 
         //调用微信支付接口，生成预支付交易单
         /*JSONObject jsonObject = weChatPayUtil.pay(
@@ -179,10 +181,6 @@ public class OrderServiceImpl extends ServiceImpl<OrdersMapper, Orders> implemen
         }
         if (ordersPageQueryDTO.getBeginTime() != null && ordersPageQueryDTO.getEndTime() != null) {
             qw.between(Orders::getOrderTime, ordersPageQueryDTO.getBeginTime(), ordersPageQueryDTO.getEndTime());
-        } else if (ordersPageQueryDTO.getBeginTime() != null) {
-            qw.ge(Orders::getOrderTime, ordersPageQueryDTO.getBeginTime());
-        } else if (ordersPageQueryDTO.getEndTime() != null){
-            qw.le(Orders::getOrderTime, ordersPageQueryDTO.getEndTime());
         }
 
         Page<Orders> page = new Page<>(ordersPageQueryDTO.getPage(), ordersPageQueryDTO.getPageSize());
