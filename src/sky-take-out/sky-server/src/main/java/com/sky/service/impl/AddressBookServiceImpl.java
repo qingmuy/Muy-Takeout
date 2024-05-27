@@ -5,16 +5,17 @@ import com.sky.entity.AddressBook;
 import com.sky.mapper.AddressBookMapper;
 import com.sky.service.AddressBookService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import javax.annotation.Resource;
 import java.util.List;
 
 @Service
 @Slf4j
 public class AddressBookServiceImpl implements AddressBookService {
-    @Autowired
-    private AddressBookMapper addressBookMapper;
+    @Resource
+    AddressBookMapper addressBookMapper;
 
     /**
      * 条件查询
@@ -54,7 +55,7 @@ public class AddressBookServiceImpl implements AddressBookService {
      * @param addressBook
      */
     public void update(AddressBook addressBook) {
-        addressBookMapper.update(addressBook);
+        addressBookMapper.updateById(addressBook);
     }
 
     /**
@@ -71,7 +72,7 @@ public class AddressBookServiceImpl implements AddressBookService {
 
         //2、将当前地址改为默认地址 update address_book set is_default = ? where id = ?
         addressBook.setIsDefault(1);
-        addressBookMapper.update(addressBook);
+        addressBookMapper.updateById(addressBook);
     }
 
     /**

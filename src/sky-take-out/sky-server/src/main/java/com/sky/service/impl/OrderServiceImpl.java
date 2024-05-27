@@ -22,6 +22,7 @@ import com.sky.result.PageResult;
 import com.sky.service.AddressBookService;
 import com.sky.service.OrderService;
 import com.sky.vo.OrderPaymentVO;
+import com.sky.vo.OrderStatisticsVO;
 import com.sky.vo.OrderSubmitVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -53,7 +54,7 @@ public class OrderServiceImpl extends ServiceImpl<OrdersMapper, Orders> implemen
     WeChatPayUtil weChatPayUtil;*/
 
     /**
-     * 提交订单
+     * 提交订单/创建订单
      * @param ordersSubmitDTO 订单信息
      * @return 订单信息
      */
@@ -85,6 +86,12 @@ public class OrderServiceImpl extends ServiceImpl<OrdersMapper, Orders> implemen
         orders.setPhone(byId.getPhone());
         orders.setConsignee(byId.getConsignee());
         orders.setUserId(BaseContext.getCurrentId());
+        orders.setUserName(userMapper.selectById(BaseContext.getCurrentId()).getName());
+
+        // 完善订单地址数据
+        AddressBook addressBook = addressBookService.getById(ordersSubmitDTO.getAddressBookId());
+        String address = addressBook.getProvinceName() + addressBook.getCityName() + addressBook.getDistrictName() + addressBook.getDetail();
+        orders.setAddress(address);
 
         ordersMapper.insert(orders);
 
@@ -165,6 +172,11 @@ public class OrderServiceImpl extends ServiceImpl<OrdersMapper, Orders> implemen
         ordersMapper.update(orders);
     }
 
+    /**
+     * 订单查询
+     * @param ordersPageQueryDTO 查询条件
+     * @return 订单分页结果
+     */
     @Override
     public PageResult search(OrdersPageQueryDTO ordersPageQueryDTO) {
         LambdaQueryWrapper<Orders> qw = new LambdaQueryWrapper<>();
@@ -187,5 +199,47 @@ public class OrderServiceImpl extends ServiceImpl<OrdersMapper, Orders> implemen
         Page<Orders> ordersPage = ordersMapper.selectPage(page, qw);
 
         return new PageResult(ordersPage.getTotal(), ordersPage.getRecords());
+    }
+
+    /**
+     * 各个状态的订单数量统计
+     * @return 订单数量
+     */
+    @Override
+    public OrderStatisticsVO countOrdersByStatus() {
+        OrderStatisticsVO orderStatisticsVO = new OrderStatisticsVO();
+
+        LambdaQueryWrapper<Orders> qwc = new LambdaQueryWrapper<>();
+        // 统计待配送/已接单订单的数量
+        qwc.eq(Orders::getStatus, Orders.CONFIRMED);
+        Long comfirmed = ordersMapper.selectCount(qwc);
+
+        LambdaQueryWrapper<Orders> qwd = new LambdaQueryWrapper<>();
+        // 统计派送中订单的数量
+        qwd.eq(Orders::getStatus, Orders.DELIVERY_IN_PROGRESS);
+        Long deliveryInProgress = ordersMapper.selectCount(qwd);
+
+        LambdaQueryWrapper<Orders> qwt = new LambdaQueryWrapper<>();
+        // 统计待接单订单的数量
+        qwt.eq(Orders::getStatus, Orders.TO_BE_CONFIRMED);
+        Long toBeConfirmed = ordersMapper.selectCount(qwt);
+
+        orderStatisticsVO.setConfirmed(Math.toIntExact(comfirmed));
+        orderStatisticsVO.setDeliveryInProgress(Math.toIntExact(deliveryInProgress));
+        orderStatisticsVO.setToBeConfirmed(Math.toIntExact(toBeConfirmed));
+
+        return orderStatisticsVO;
+    }
+
+    /**
+     * 接单
+     * @param id 订单id
+     */
+    @Override
+    public void confirm(Long id) {
+        Orders orders = ordersMapper.selectById(id);
+        orders.setStatus(Orders.CONFIRMED);
+
+        ordersMapper.update(orders);
     }
 }

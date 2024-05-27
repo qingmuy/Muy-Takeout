@@ -6,6 +6,7 @@ import com.sky.result.Result;
 import com.sky.service.AddressBookService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
@@ -13,6 +14,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/user/addressBook")
 @Api(tags = "C端地址簿接口")
+@Slf4j
 public class AddressBookController {
 
     @Autowired
@@ -61,6 +63,7 @@ public class AddressBookController {
     @PutMapping
     @ApiOperation("根据id修改地址")
     public Result update(@RequestBody AddressBook addressBook) {
+        log.info("地址更改：{}",addressBook);
         addressBookService.update(addressBook);
         return Result.success();
     }

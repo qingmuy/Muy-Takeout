@@ -7,6 +7,7 @@ import com.sky.dto.OrdersSubmitDTO;
 import com.sky.entity.Orders;
 import com.sky.result.PageResult;
 import com.sky.vo.OrderPaymentVO;
+import com.sky.vo.OrderStatisticsVO;
 import com.sky.vo.OrderSubmitVO;
 
 public interface OrderService extends IService<Orders> {
@@ -36,4 +37,16 @@ public interface OrderService extends IService<Orders> {
      * @return 查询结果
      */
     PageResult search(OrdersPageQueryDTO ordersPageQueryDTO);
+
+    /**
+     * 查询各个状态订单的数量
+     * @return 返回类
+     */
+    OrderStatisticsVO countOrdersByStatus();
+
+    /**
+     * 接单
+     * @param id 订单id
+     */
+    void confirm(Long id);
 }
