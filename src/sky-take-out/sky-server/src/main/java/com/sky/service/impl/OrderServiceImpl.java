@@ -6,15 +6,14 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.sky.constant.MessageConstant;
 import com.sky.context.BaseContext;
-import com.sky.dto.OrdersPageQueryDTO;
-import com.sky.dto.OrdersPaymentDTO;
-import com.sky.dto.OrdersSubmitDTO;
+import com.sky.dto.*;
 import com.sky.entity.AddressBook;
 import com.sky.entity.OrderDetail;
 import com.sky.entity.Orders;
 import com.sky.entity.ShoppingCart;
 import com.sky.exception.AddressBookBusinessException;
 import com.sky.exception.ShoppingCartBusinessException;
+import com.sky.mapper.OrderDetailMapper;
 import com.sky.mapper.OrdersMapper;
 import com.sky.mapper.ShoppingCartMapper;
 import com.sky.mapper.UserMapper;
@@ -24,6 +23,7 @@ import com.sky.service.OrderService;
 import com.sky.vo.OrderPaymentVO;
 import com.sky.vo.OrderStatisticsVO;
 import com.sky.vo.OrderSubmitVO;
+import com.sky.vo.OrderVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -46,6 +46,9 @@ public class OrderServiceImpl extends ServiceImpl<OrdersMapper, Orders> implemen
 
     @Resource
     OrdersMapper ordersMapper;
+
+    @Resource
+    OrderDetailMapper orderDetailMapper;
 
     @Resource
     UserMapper userMapper;
@@ -241,5 +244,117 @@ public class OrderServiceImpl extends ServiceImpl<OrdersMapper, Orders> implemen
         orders.setStatus(Orders.CONFIRMED);
 
         ordersMapper.update(orders);
+    }
+
+    /**
+     * 拒单
+     * @param ordersRejectionDTO 拒单的信息
+     */
+    @Override
+    public void reject(OrdersRejectionDTO ordersRejectionDTO) {
+        Orders orders = ordersMapper.selectById(ordersRejectionDTO.getId());
+
+        // 设置订单的状态
+        orders.setStatus(Orders.CANCELLED);
+        orders.setPayStatus(Orders.REFUND);
+        orders.setRejectionReason(ordersRejectionDTO.getRejectionReason());
+
+        this.updateById(orders);
+    }
+
+    /**
+     * 查询订单详情
+     * @param id 订单id
+     * @return 订单详情
+     */
+    @Override
+    public OrderVO queryOrderDetail(Long id) {
+        // 订单数据
+        Orders order = this.getById(id);
+
+        OrderVO orderVO = new OrderVO();
+        BeanUtils.copyProperties(order, orderVO);
+
+        LambdaQueryWrapper<OrderDetail> qw = new LambdaQueryWrapper<>();
+        qw.eq(OrderDetail::getOrderId, id);
+        List<OrderDetail> orders = orderDetailMapper.selectList(qw);
+
+        orderVO.setOrderDetailList(orders);
+
+        return orderVO;
+    }
+
+    /**
+     * 取消订单
+     * @param ordersCancelDTO 订单信息
+     */
+    @Override
+    public void cancal(OrdersCancelDTO ordersCancelDTO) {
+        Orders orders = ordersMapper.selectById(ordersCancelDTO.getId());
+        orders.setStatus(Orders.CANCELLED);
+        orders.setCancelReason(ordersCancelDTO.getCancelReason());
+        orders.setCancelTime(LocalDateTime.now());
+        ordersMapper.update(orders);
+    }
+
+    /**
+     * 派送订单
+     * @param id 订单id
+     */
+    @Override
+    public void deliver(Long id) {
+        Orders order = this.getById(id);
+
+        order.setStatus(Orders.DELIVERY_IN_PROGRESS);
+        order.setEstimatedDeliveryTime(LocalDateTime.now().plusMinutes(45));
+
+        ordersMapper.update(order);
+    }
+
+    @Override
+    public void complete(Long id) {
+        Orders order = this.getById(id);
+
+        order.setStatus(Orders.COMPLETED);
+        order.setDeliveryTime(LocalDateTime.now());
+
+        this.updateById(order);
+    }
+
+    @Override
+    public PageResult queryHistoryOrders(Integer page, Integer pageSize, Integer status) {
+        Page<Orders> page1 = new Page<>(page, pageSize);    // 分页查询 条件
+        Page<Orders> orderPage;     // 分页查询结果
+
+        // 判断是否为有条件查询
+        if (status != null) {
+            LambdaQueryWrapper<Orders> qw = new LambdaQueryWrapper<>();
+            qw.eq(Orders::getStatus, status);
+
+            orderPage = ordersMapper.selectPage(page1, qw);
+        } else {
+            orderPage = ordersMapper.selectPage(page1, null);
+        }
+
+        // 将分页查询结果 Orders类封装为OrderVO类 改为列表
+        ArrayList<OrderVO> arrayList = new ArrayList<>();
+        for (Orders order : orderPage.getRecords()) {
+            LambdaQueryWrapper<OrderDetail> qw = new LambdaQueryWrapper<>();
+            qw.eq(OrderDetail::getOrderId, order.getId());
+
+            List<OrderDetail> orderDetails = orderDetailMapper.selectList(qw);
+            OrderVO orderVO = new OrderVO();
+            BeanUtils.copyProperties(order, orderVO);
+            orderVO.setOrderDetailList(orderDetails);
+
+            arrayList.add(orderVO);
+        }
+
+        // 改为OrderVO分页结果
+        PageResult pageResult = new PageResult();
+        pageResult.setTotal(orderPage.getTotal());
+        pageResult.setRecords(arrayList);
+
+        return pageResult;
     }
 }

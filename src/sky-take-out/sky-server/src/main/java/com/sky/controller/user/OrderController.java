@@ -1,18 +1,23 @@
 package com.sky.controller.user;
 
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.sky.dto.OrdersPaymentDTO;
 import com.sky.dto.OrdersSubmitDTO;
+import com.sky.entity.Orders;
+import com.sky.result.PageResult;
 import com.sky.result.Result;
 import com.sky.service.OrderService;
 import com.sky.vo.OrderPaymentVO;
 import com.sky.vo.OrderSubmitVO;
+import com.sky.vo.OrderVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
 
 @RestController(value = "userOrderController")
 @RequestMapping("/user/order")
@@ -25,6 +30,7 @@ public class OrderController {
 
     /**
      * 提交订单
+     *
      * @param ordersSubmitDTO 订单信息
      * @return 订单信息
      */
@@ -50,5 +56,11 @@ public class OrderController {
         log.info("生成预支付交易单：{}", orderPaymentVO);
         orderService.paySuccess(ordersPaymentDTO.getOrderNumber());
         return Result.success(orderPaymentVO);
+    }
+
+    @GetMapping("/historyOrders")
+    @ApiOperation("查询历史订单")
+    public Result<PageResult> queryHistoryOrders(Integer page, Integer pageSize, Integer status) {
+        return  Result.success(orderService.queryHistoryOrders(page, pageSize, status));
     }
 }
