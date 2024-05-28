@@ -1,9 +1,8 @@
 package com.sky.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.github.pagehelper.Page;
-import com.github.pagehelper.PageHelper;
 import com.sky.constant.MessageConstant;
 import com.sky.constant.StatusConstant;
 import com.sky.context.BaseContext;
@@ -72,9 +71,15 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
      */
     @Override
     public PageResult pageQuery(DishPageQueryDTO dishPageQueryDTO) {
-        PageHelper.startPage(dishPageQueryDTO.getPage(), dishPageQueryDTO.getPageSize());
+        /*PageHelper.startPage(dishPageQueryDTO.getPage(), dishPageQueryDTO.getPageSize());
         Page<DishVO> page = dishMapper.pageQuery(dishPageQueryDTO);
-        return new PageResult(page.getTotal(), page.getResult());
+        return new PageResult(page.getTotal(), page.getResult());*/
+
+        Page<Dish> page = new Page<>(dishPageQueryDTO.getPage(), dishPageQueryDTO.getPageSize());
+
+        Page<Dish> dishPage = dishMapper.selectPage(page, null);
+
+        return new PageResult(dishPage.getTotal(), dishPage.getRecords());
     }
 
     /**
@@ -171,8 +176,8 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
 
     /**
      * 条件查询菜品和口味
-     * @param dish
-     * @return
+     * @param dish 菜品信息
+     * @return 菜品信息
      */
     public List<DishVO> listWithFlavor(Dish dish) {
         LambdaQueryWrapper<Dish> qw = new LambdaQueryWrapper<>();

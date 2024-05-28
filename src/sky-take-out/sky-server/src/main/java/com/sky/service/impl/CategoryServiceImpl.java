@@ -1,8 +1,7 @@
 package com.sky.service.impl;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.github.pagehelper.Page;
-import com.github.pagehelper.PageHelper;
 import com.sky.constant.MessageConstant;
 import com.sky.constant.StatusConstant;
 import com.sky.dto.CategoryDTO;
@@ -56,10 +55,14 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
      * @return 分页查询的详细信息
      */
     public PageResult pageQuery(CategoryPageQueryDTO categoryPageQueryDTO) {
-        PageHelper.startPage(categoryPageQueryDTO.getPage(),categoryPageQueryDTO.getPageSize());
+        Page<Category> page = new Page<>(categoryPageQueryDTO.getPage(),categoryPageQueryDTO.getPageSize());
+
+        /*PageHelper.startPage(categoryPageQueryDTO.getPage(),categoryPageQueryDTO.getPageSize());
         //下一条sql进行分页，自动加入limit关键字分页
-        Page<Category> page = categoryMapper.pageQuery(categoryPageQueryDTO);
-        return new PageResult(page.getTotal(), page.getResult());
+        Page<Category> page = categoryMapper.pageQuery(categoryPageQueryDTO);*/
+
+        Page<Category> categoryPage = categoryMapper.selectPage(page, null);
+        return new PageResult(categoryPage.getTotal(), categoryPage.getRecords());
     }
 
     /**

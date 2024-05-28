@@ -1,7 +1,6 @@
 package com.sky.controller.user;
 
 
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.sky.dto.OrdersPaymentDTO;
 import com.sky.dto.OrdersSubmitDTO;
 import com.sky.entity.Orders;
@@ -17,7 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
+import java.time.LocalDateTime;
 
 @RestController(value = "userOrderController")
 @RequestMapping("/user/order")
@@ -30,7 +29,6 @@ public class OrderController {
 
     /**
      * 提交订单
-     *
      * @param ordersSubmitDTO 订单信息
      * @return 订单信息
      */
@@ -44,9 +42,8 @@ public class OrderController {
 
     /**
      * 订单支付
-     *
-     * @param ordersPaymentDTO
-     * @return
+     * @param ordersPaymentDTO 订单数据
+     * @return 支付信息
      */
     @PutMapping("/payment")
     @ApiOperation("订单支付")
@@ -58,9 +55,55 @@ public class OrderController {
         return Result.success(orderPaymentVO);
     }
 
+    /**
+     * 查询历史订单
+     * @param page     当前页
+     * @param pageSize 页容量
+     * @param status   状态
+     * @return 页结果
+     */
     @GetMapping("/historyOrders")
     @ApiOperation("查询历史订单")
     public Result<PageResult> queryHistoryOrders(Integer page, Integer pageSize, Integer status) {
-        return  Result.success(orderService.queryHistoryOrders(page, pageSize, status));
+        return Result.success(orderService.queryHistoryOrders(page, pageSize, status));
+    }
+
+    /**
+     * 查询订单详情
+     * @param id 订单id
+     * @return 订单详情
+     */
+    @GetMapping("/orderDetail/{id}")
+    @ApiOperation("查询订单详情")
+    public Result<OrderVO> queryOrders(@PathVariable Long id) {
+        return Result.success(orderService.queryOrderDetail(id));
+    }
+
+    /**
+     * 取消订单
+     * @param id 订单id
+     * @return 取消成功
+     */
+    @PutMapping("/cancel/{id}")
+    @ApiOperation("取消订单")
+    public Result<String> cancel(@PathVariable Long id) {
+        Orders order = orderService.getById(id);
+        order.setStatus(Orders.CANCELLED);
+        order.setCancelTime(LocalDateTime.now());
+        order.setCancelReason("用户主动取消订单");
+        orderService.updateById(order);
+        return Result.success();
+    }
+
+    /**
+     * 再来一单
+     * @param id 订单id
+     * @return OK
+     */
+    @PostMapping("/repetition/{id}")
+    @ApiOperation("再来一单")
+    public Result<String> again(@PathVariable Long id) {
+        orderService.again(id);
+        return Result.success();
     }
 }

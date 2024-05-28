@@ -19,14 +19,14 @@ public interface OrderService extends IService<Orders> {
 
     /**
      * 订单支付
-     * @param ordersPaymentDTO
-     * @return
+     * @param ordersPaymentDTO 订单信息
+     * @return 支付信息
      */
     OrderPaymentVO payment(OrdersPaymentDTO ordersPaymentDTO) throws Exception;
 
     /**
      * 支付成功，修改订单状态
-     * @param outTradeNo
+     * @param outTradeNo 订单号
      */
     void paySuccess(String outTradeNo);
 
@@ -88,4 +88,10 @@ public interface OrderService extends IService<Orders> {
      * @return 分页结果
      */
     PageResult queryHistoryOrders(Integer page, Integer pageSize, Integer status);
+
+    /**
+     * 再来一单
+     * @param id 订单id
+     */
+    void again(Long id);
 }

@@ -125,12 +125,12 @@ public class OrderServiceImpl extends ServiceImpl<OrdersMapper, Orders> implemen
     /**
      * 订单支付
      *
-     * @param ordersPaymentDTO
-     * @return
+     * @param ordersPaymentDTO 订单支付信息
+     * @return 支付信息
      */
     public OrderPaymentVO payment(OrdersPaymentDTO ordersPaymentDTO) throws Exception {
         // 当前登录用户id
-        Long userId = BaseContext.getCurrentId();
+        // Long userId = BaseContext.getCurrentId();
         // User user = userMapper.selectById(userId);
 
         //调用微信支付接口，生成预支付交易单
@@ -157,7 +157,7 @@ public class OrderServiceImpl extends ServiceImpl<OrdersMapper, Orders> implemen
     /**
      * 支付成功，修改订单状态
      *
-     * @param outTradeNo
+     * @param outTradeNo 订单号
      */
     public void paySuccess(String outTradeNo) {
 
@@ -350,11 +350,59 @@ public class OrderServiceImpl extends ServiceImpl<OrdersMapper, Orders> implemen
             arrayList.add(orderVO);
         }
 
+
+
         // 改为OrderVO分页结果
         PageResult pageResult = new PageResult();
         pageResult.setTotal(orderPage.getTotal());
         pageResult.setRecords(arrayList);
 
         return pageResult;
+    }
+
+    /**
+     * 再来一单
+     * @param id 订单id
+     */
+    @Transactional
+    @Override
+    public void again(Long id) {
+        // 复刻当前订单数据
+        Orders target = new Orders();
+
+        Orders source = this.getById(id);
+        BeanUtils.copyProperties(source, target);
+
+        log.info("订单号：{}", System.currentTimeMillis());
+        target.setNumber(String.valueOf(System.currentTimeMillis()));
+        target.setOrderTime(LocalDateTime.now());
+        target.setCancelTime(null);
+        target.setPayMethod(0);
+        target.setPayStatus(Orders.UN_PAID);
+        target.setCancelTime(null);
+        target.setCancelReason(null);
+        target.setRejectionReason(null);
+        target.setEstimatedDeliveryTime(null);
+        target.setDeliveryTime(null);
+
+        // 完成订单信息的插入
+        ordersMapper.insert(target);
+
+        // 查询原订单的菜品信息
+        LambdaQueryWrapper<OrderDetail> qw = new LambdaQueryWrapper<>();
+        qw.eq(OrderDetail::getOrderId, id);
+        List<OrderDetail> orderDetails = orderDetailMapper.selectList(qw);
+
+        for (OrderDetail orderDetail : orderDetails) {
+            OrderDetail orderDetailTarget = new OrderDetail();
+
+            // 复制信息
+            BeanUtils.copyProperties(orderDetail, orderDetailTarget);
+
+            orderDetailTarget.setId(null);
+            orderDetailTarget.setOrderId(target.getId());
+
+            orderDetailMapper.insert(orderDetailTarget);
+        }
     }
 }
