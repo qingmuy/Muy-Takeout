@@ -1,5 +1,6 @@
 package com.sky.service.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -24,6 +25,7 @@ import com.sky.vo.OrderPaymentVO;
 import com.sky.vo.OrderStatisticsVO;
 import com.sky.vo.OrderSubmitVO;
 import com.sky.vo.OrderVO;
+import com.sky.websocket.WebSocketServer;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -32,6 +34,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 @Service
@@ -52,6 +55,9 @@ public class OrderServiceImpl extends ServiceImpl<OrdersMapper, Orders> implemen
 
     @Resource
     UserMapper userMapper;
+
+    @Resource
+    WebSocketServer webSocketServer;
 
     /*@Resource
     WeChatPayUtil weChatPayUtil;*/
@@ -173,6 +179,16 @@ public class OrderServiceImpl extends ServiceImpl<OrdersMapper, Orders> implemen
                 .build();
 
         ordersMapper.update(orders);
+
+        //通过webcoket向客户端推送消息
+        HashMap<Object, Object> hashMap = new HashMap<>();
+
+        hashMap.put("type", 1); //1表示来单提醒，2表示用户催单
+        hashMap.put("orderId", ordersDB.getId());
+        hashMap.put("content", "订单号" + outTradeNo);
+
+        String jsonString = JSON.toJSONString(hashMap);
+        webSocketServer.sendToAllClient(jsonString);
     }
 
     /**
