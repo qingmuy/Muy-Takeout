@@ -1,12 +1,15 @@
 package com.sky.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.sky.dto.GoodsSalesDTO;
 import com.sky.entity.OrderDetail;
 import com.sky.entity.Orders;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.List;
 
 @Mapper
 public interface OrdersMapper extends BaseMapper<Orders> {
@@ -36,4 +39,12 @@ public interface OrdersMapper extends BaseMapper<Orders> {
      * @param orders
      */
     void update(Orders orders);
+
+    /**
+     * 获取销量前十的商品
+     * @param begin 起始时间
+     * @param end 结束时间
+     * @return 数据列表
+     */
+    List<GoodsSalesDTO> getSaleTop10(LocalDateTime begin, LocalDateTime end);
 }
