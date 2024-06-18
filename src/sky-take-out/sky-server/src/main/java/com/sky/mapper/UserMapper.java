@@ -7,6 +7,8 @@ import com.sky.enumeration.OperationType;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 
+import java.util.Map;
+
 @Mapper
 public interface UserMapper extends BaseMapper<User> {
 
@@ -24,4 +26,11 @@ public interface UserMapper extends BaseMapper<User> {
      */
     @AutoFill(OperationType.INSERT)
     void insertByAutoFill(User newuser);
+
+    /**
+     * 查询用户数量
+     * @param map 查询条件
+     * @return 查询结果
+     */
+    Integer countByMap(Map map);
 }

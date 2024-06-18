@@ -10,6 +10,7 @@ import org.apache.ibatis.annotations.Select;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Mapper
 public interface OrdersMapper extends BaseMapper<Orders> {
@@ -47,4 +48,18 @@ public interface OrdersMapper extends BaseMapper<Orders> {
      * @return 数据列表
      */
     List<GoodsSalesDTO> getSaleTop10(LocalDateTime begin, LocalDateTime end);
+
+    /**
+     * 根据条件查询个数
+     * @param map 查询条件
+     * @return 结果
+     */
+    Integer countByMap(Map map);
+
+    /**
+     * 根据条件查询总和
+     * @param map 查询条件
+     * @return 查询结果
+     */
+    Double sumByMap(Map map);
 }
