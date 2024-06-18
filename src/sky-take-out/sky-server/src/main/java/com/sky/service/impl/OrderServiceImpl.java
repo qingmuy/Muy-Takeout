@@ -13,6 +13,7 @@ import com.sky.entity.OrderDetail;
 import com.sky.entity.Orders;
 import com.sky.entity.ShoppingCart;
 import com.sky.exception.AddressBookBusinessException;
+import com.sky.exception.OrderBusinessException;
 import com.sky.exception.ShoppingCartBusinessException;
 import com.sky.mapper.OrderDetailMapper;
 import com.sky.mapper.OrdersMapper;
@@ -366,8 +367,6 @@ public class OrderServiceImpl extends ServiceImpl<OrdersMapper, Orders> implemen
             arrayList.add(orderVO);
         }
 
-
-
         // 改为OrderVO分页结果
         PageResult pageResult = new PageResult();
         pageResult.setTotal(orderPage.getTotal());
@@ -420,5 +419,23 @@ public class OrderServiceImpl extends ServiceImpl<OrdersMapper, Orders> implemen
 
             orderDetailMapper.insert(orderDetailTarget);
         }
+    }
+
+    @Override
+    public void reminder(Long id) {
+        // 获取当前订单
+        Orders orders = ordersMapper.selectById(id);
+
+        // 校验订单是否存在
+        if (orders == null) {
+            throw new OrderBusinessException(MessageConstant.ORDER_NOT_FOUND);
+        }
+
+        HashMap<Object, Object> hashMap = new HashMap<>();
+        hashMap.put("type", 2); //1表示来单提醒，2表示客户催单
+        hashMap.put("orderId", id);
+        hashMap.put("content", "订单号" + orders.getNumber());
+
+        webSocketServer.sendToAllClient(JSON.toJSONString(hashMap));
     }
 }

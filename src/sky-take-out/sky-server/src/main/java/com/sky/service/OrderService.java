@@ -94,4 +94,10 @@ public interface OrderService extends IService<Orders> {
      * @param id 订单id
      */
     void again(Long id);
+
+    /**
+     * 催单
+     * @param id 订单id
+     */
+    void reminder(Long id);
 }
