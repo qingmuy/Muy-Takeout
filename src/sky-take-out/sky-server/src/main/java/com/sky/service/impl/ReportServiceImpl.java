@@ -6,6 +6,7 @@ import com.sky.entity.User;
 import com.sky.mapper.OrdersMapper;
 import com.sky.mapper.UserMapper;
 import com.sky.service.ReportService;
+import com.sky.vo.OrderReportVO;
 import com.sky.vo.TurnoverReportVO;
 import com.sky.vo.UserReportVO;
 import lombok.extern.slf4j.Slf4j;
@@ -84,7 +85,7 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
-    public UserReportVO userStatistics(LocalDate begin, LocalDate end) {
+    public UserReportVO getUserStatistics(LocalDate begin, LocalDate end) {
 
         // 日期列表
         ArrayList<LocalDate> dateList = new ArrayList<>();
@@ -129,5 +130,75 @@ public class ReportServiceImpl implements ReportService {
         totalUserList.add(userMapper.selectCount(qwTotal));
 
         return new UserReportVO(StringUtils.join(dateList, ","), StringUtils.join(totalUserList, ","), StringUtils.join(newUserList, ","));
+    }
+
+    @Override
+    public OrderReportVO getOrdersStatistics(LocalDate begin, LocalDate end) {
+
+        // 日期列表
+        ArrayList<LocalDate> dateList = new ArrayList<>();
+
+        // 每日订单数列表
+        ArrayList<Long> orderCountList = new ArrayList<>();
+
+        // 每日有效订单数
+        ArrayList<Long> valiOrderCountList = new ArrayList<>();
+
+        LambdaQueryWrapper<Orders> qwTotal = new LambdaQueryWrapper<>();
+        LambdaQueryWrapper<Orders> qwSuccess = new LambdaQueryWrapper<>();
+
+        // 先查询订单总数和有效订单数
+        qwTotal.ge(Orders::getOrderTime, LocalDateTime.of(begin, LocalTime.MIN))
+                .le(Orders::getOrderTime, LocalDateTime.of(end, LocalTime.MAX));
+        qwSuccess.ge(Orders::getOrderTime, LocalDateTime.of(begin, LocalTime.MIN))
+                .le(Orders::getOrderTime, LocalDateTime.of(end, LocalTime.MAX))
+                .eq(Orders::getStatus, Orders.COMPLETED);
+
+        Integer totalOrderCount = ordersMapper.selectCount(qwTotal).intValue();
+        Integer valiOrderCount = ordersMapper.selectCount(qwSuccess).intValue();
+
+        qwTotal.clear();
+        qwSuccess.clear();
+
+        while (!begin.equals(end)) {
+            // 查询当日的订单总数
+            qwTotal.ge(Orders::getOrderTime, LocalDateTime.of(begin, LocalTime.MIN))
+                    .le(Orders::getOrderTime, LocalDateTime.of(begin, LocalTime.MAX));
+
+            // 查询当日有效订单数
+            qwSuccess.ge(Orders::getOrderTime, LocalDateTime.of(begin, LocalTime.MIN))
+                    .le(Orders::getOrderTime, LocalDateTime.of(begin, LocalTime.MAX))
+                    .eq(Orders::getStatus, Orders.COMPLETED);
+
+            // 增添数据
+            orderCountList.add(ordersMapper.selectCount(qwTotal));
+            valiOrderCountList.add(ordersMapper.selectCount(qwSuccess));
+            dateList.add(begin);
+
+            // 清空查询条件
+            qwTotal.clear();
+            qwSuccess.clear();
+
+            // 日期加一
+            begin = begin.plusDays(1);
+        }
+
+        // 处理最后一天
+        qwTotal.ge(Orders::getOrderTime, LocalDateTime.of(begin, LocalTime.MIN))
+                .le(Orders::getOrderTime, LocalDateTime.of(begin, LocalTime.MAX));
+
+        qwSuccess.ge(Orders::getOrderTime, LocalDateTime.of(begin, LocalTime.MIN))
+                .le(Orders::getOrderTime, LocalDateTime.of(begin, LocalTime.MAX))
+                .eq(Orders::getStatus, Orders.COMPLETED);
+
+        // 增添数据
+        orderCountList.add(ordersMapper.selectCount(qwTotal));
+        valiOrderCountList.add(ordersMapper.selectCount(qwSuccess));
+        dateList.add(begin);
+
+        return new OrderReportVO(StringUtils.join(dateList, ","),
+                StringUtils.join(orderCountList, ","),
+                StringUtils.join(valiOrderCountList, ","),
+                totalOrderCount, valiOrderCount, valiOrderCount.doubleValue() / totalOrderCount);
     }
 }
