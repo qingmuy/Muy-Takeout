@@ -1,5 +1,6 @@
 package com.qingmuy.controller.user;
 
+import cn.hutool.core.util.RandomUtil;
 import cn.hutool.json.JSONUtil;
 import com.qingmuy.constant.StatusConstant;
 import com.qingmuy.entity.Category;
@@ -104,7 +105,7 @@ public class DishController {
                 String dishJson = JSONUtil.toJsonStr(dishVO);
                 stringRedisTemplate.opsForHash().put("dish:category" + dishVO.getCategoryId(), dishVO.getId().toString(), dishJson);
             }
-            stringRedisTemplate.expire("dish:category" + categoryId, 5, TimeUnit.MINUTES);
+            stringRedisTemplate.expire("dish:category" + categoryId, 300 + RandomUtil.randomInt(60), TimeUnit.SECONDS);
         } finally {
             lock.unlock();
         }
